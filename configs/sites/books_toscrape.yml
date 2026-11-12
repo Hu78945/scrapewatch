@@ -1,0 +1,14 @@
+name: books_toscrape
+description: Book catalogue list pages (1000 books over 50 pages). Static HTML -> httpx.
+start_urls: [https://books.toscrape.com/catalogue/page-1.html]
+fetcher: http
+item_css: article.product_pod
+fields:
+  url:          {css: "h3 a", attr: href, absolute_url: true, required: true}
+  title:        {css: "h3 a", attr: title, required: true}
+  price_gbp:    {css: "p.price_color", regex: "([0-9]+\\.[0-9]{2})", type: float, required: true}
+  rating:       {css: "p.star-rating", attr: class, regex: "star-rating (\\w+)", required: true}
+  availability: {css: "p.availability"}
+key_fields: [url]
+pagination: {next_css: "li.next a", max_pages: 60}
+rate_limit: {requests_per_second: 2}

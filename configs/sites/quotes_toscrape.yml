@@ -1,0 +1,13 @@
+name: quotes_toscrape
+description: Quotes, authors and tags (100 quotes over 10 pages). Static HTML -> httpx.
+start_urls: [https://quotes.toscrape.com/page/1/]
+fetcher: http
+item_css: div.quote
+fields:
+  text:       {css: "span.text", required: true}
+  author:     {css: "small.author", required: true}
+  author_url: {xpath: ".//a[contains(@href, '/author/')]/@href", absolute_url: true}
+  tags:       {css: "a.tag", many: true}
+key_fields: [text, author]
+pagination: {next_css: "li.next a", max_pages: 20}
+rate_limit: {requests_per_second: 2}
