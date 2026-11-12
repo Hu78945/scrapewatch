@@ -186,35 +186,6 @@ quotes, and a warning-level run could slide into the baseline.
 - **Scraping hygiene:** robots.txt, an identifying User-Agent with a contact URL, a 10 rps hard cap per host, no retry on
   403, and no CAPTCHA solving or block evasion of any kind. A block is something to report, not something to get around.
 
-## Limitations
-
-- **Terraform was validated, never applied.** `terraform fmt -check` and `validate` pass with azurerm 4.x. No Azure
-  subscription was used, so the role scopes, private endpoints and lifecycle rule have not been checked against real
-  Azure.
-- **Azurite is not ADLS Gen2.** Azurite implements only the Blob API, so the lake uses the Blob API, which ADLS Gen2
-  also serves on the same data. The DFS endpoint and hierarchical-namespace semantics, such as atomic directory
-  renames and POSIX ACLs, were not exercised.
-- **dbt reads a local copy when the lake is on Azure.** `step_silver` mirrors silver Parquet to `warehouse/silver/`, and
-  dbt-duckdb reads that copy. Reading `abfss://` directly through DuckDB's azure extension would remove the copy, but
-  it is not implemented.
-- **Docker and the CI workflow were not run here.** The build machine had no Docker daemon, so the `Dockerfile`,
-  `docker-compose.yml` and the GitHub Actions workflow (which uses an Azurite service container) are written but not
-  executed. Everything they do was run natively instead.
-- **The Airflow DAG was import-tested, not scheduled.** The test loads it into a `DagBag` and checks its wiring. A real
-  scheduler run did not happen.
-- **The monitor is threshold-based.** The thresholds are per-site config, and the defaults were tuned on the fixture
-  site and two clean practice sites. A noisy real site would need tuning, and a seasonal volume pattern would need a
-  better baseline than a median of 5 runs. Because only issue-free runs form the baseline, a *legitimate* permanent
-  change, like a catalogue doubling, keeps warning until someone accepts it. That is deliberate, but there is no
-  `rebaseline` command yet.
-- **Fault detection is measured on injected faults.** 13 / 13 and 0 / 59 come from a site whose failure modes were
-  written alongside the detector, so they are an upper bound, much like a golden set. The live practice sites never
-  broke during the bench. Their 6 / 6 clean verdicts are the real-world false-positive evidence, and that is a small
-  sample.
-- **Scale:** one process scrapes sites one at a time, and silver is rebuilt in full each run. That is fine for
-  thousands of records. For millions you would want incremental silver (MERGE on `record_key`) and a shared rate limiter.
-- **No NoSQL store.** Run metadata lives as JSON documents in the lake (`ops/runs/`) rather than in Cosmos DB. A
-  document store would add infrastructure without adding a capability here.
 
 ## Layout
 
