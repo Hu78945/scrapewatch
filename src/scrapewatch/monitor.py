@@ -73,8 +73,9 @@ def measure(cfg: SiteConfig, result: ScrapeResult, run_id: str | None = None) ->
 
 
 def baseline(history: list[dict], n: int) -> dict | None:
-    """Recent runs with no critical issue. Broken runs never become the baseline."""
-    good = [h for h in sorted(history, key=lambda h: h["started_at"]) if h.get("severity") != "critical"][-n:]
+    """The last n runs with no issue at all. A run that raised anything (even a warning) never becomes the baseline,
+    so a persisting regression keeps alarming instead of quietly becoming the new normal."""
+    good = [h for h in sorted(history, key=lambda h: h["started_at"]) if h.get("severity") == "ok"][-n:]
     if not good:
         return None
     fields = good[-1]["null_rate"].keys()
@@ -102,7 +103,12 @@ def evaluate(cfg: SiteConfig, m: dict, base: dict | None) -> list[dict]:
     if m["blocked_pages"]:
         add("blocked", "critical", f"blocked on {sum(m['blocked_pages'].values())} page(s)", reasons=m["blocked_pages"])
     if m["fetch_error_pages"]:
-        add("fetch_error", "critical", f"{m['fetch_error_pages']} page(s) failed after retries", status=m["status_counts"])
+        add(
+            "fetch_error",
+            "critical",
+            f"{m['fetch_error_pages']} page(s) failed after retries",
+            status=m["status_counts"],
+        )
     if m["zero_item_pages"]:
         add(
             "selector_breakage",
@@ -178,7 +184,11 @@ def markdown(report: dict) -> str:
         "",
         f"run `{report['run_id']}` · {report['pages']} pages ({report['pages_ok']} ok) · {report['items']} items · "
         f"{report['requests']} requests ({report['retries']} retries) · {report['duration_s']}s · "
-        f"baseline: {report['baseline_runs']} run(s), median {report['baseline_items']} items",
+        + (
+            f"baseline: {report['baseline_runs']} healthy run(s), median {report['baseline_items']:g} items"
+            if report["baseline_runs"]
+            else "no baseline yet (first healthy run): relative checks skipped"
+        ),
         "",
     ]
     lines += [f"- **{i['severity']}** `{i['class']}`: {i['message']}" for i in report["issues"]] or ["- no issues"]

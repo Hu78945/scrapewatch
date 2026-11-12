@@ -82,6 +82,9 @@ class TestSite:
             return 200, self.robots, {}
         self.hits[path] = self.hits.get(path, 0) + 1
         f = self.fault
+        if path.startswith("/js/page-"):  # same catalogue, rendered client-side: needs the browser fetcher
+            n = int(path.removeprefix("/js/page-").removesuffix(".html"))
+            return (200, self.render_js(n), {}) if n <= self.pages else (404, "<html><body>nf</body></html>", {})
         if not path.startswith("/catalog/page-"):
             return 404, "<html><body>not found</body></html>", {}
         n = int(path.removeprefix("/catalog/page-").removesuffix(".html"))
@@ -132,7 +135,7 @@ class TestSite:
             shell = ("container-fluid", "page_inner", "page-header", "action", "breadcrumb", "row", "pager", "footer")
         c = dict(zip(("wrap", "inner", "head", "brand", "crumbs", "list", "pager", "foot"), shell, strict=True))
         return (
-            f'<!DOCTYPE html><html><head><title>Catalogue page {n}</title></head><body>'
+            f"<!DOCTYPE html><html><head><title>Catalogue page {n}</title></head><body>"
             f'<div class="{c["wrap"]}"><div class="{c["inner"]}">'
             f'<header class="{c["head"]}"><a class="{c["brand"]}" href="/">Test Catalogue</a></header>'
             f'<ul class="{c["crumbs"]}"><li class="crumb-home"><a href="/">Home</a></li></ul>'
@@ -141,6 +144,21 @@ class TestSite:
             f'<footer class="{c["foot"]}"><p class="copyright">test fixture</p></footer>'
             f"</div></div></body></html>"
         )
+
+    def render_js(self, n: int) -> str:
+        html = self.render(n, self.pages)
+        start, end = html.index('<ol class="row">') + len('<ol class="row">'), html.index("</ol>")
+        items, nxt = html[start:end], f"page-{n + 1}.html" if n < self.pages else None
+        shell = html[:start] + html[end:]
+        pager = f'<li class="next"><a href="{nxt}">next</a></li>' if nxt else ""
+        script = (
+            "<script>setTimeout(function(){"
+            f"document.querySelector('ol.row').innerHTML = {json.dumps(items)};"
+            f"document.querySelector('ul.pager').insertAdjacentHTML('beforeend', {json.dumps(pager)});"
+            "}, 50);</script>"
+        )
+        shell = shell.replace(f'<li class="next"><a href="page-{n + 1}.html">next</a></li>', "")
+        return shell.replace("</body>", script + "</body>")
 
     def config(self, **overrides) -> dict:
         """A SiteConfig dict for this site (validated by the caller)."""
@@ -151,7 +169,12 @@ class TestSite:
             "fields": {
                 "url": {"css": "h3 a", "attr": "href", "absolute_url": True, "required": True},
                 "title": {"css": "h3 a", "attr": "title", "required": True},
-                "price_gbp": {"css": "p.price_color", "regex": r"([0-9]+\.[0-9]{2})", "type": "float", "required": True},
+                "price_gbp": {
+                    "css": "p.price_color",
+                    "regex": r"([0-9]+\.[0-9]{2})",
+                    "type": "float",
+                    "required": True,
+                },
                 "rating": {"css": "p.star-rating", "attr": "class", "regex": r"star-rating (\w+)", "required": True},
                 "availability": {"css": "p.availability"},
             },

@@ -56,9 +56,18 @@ def write_bronze(lake, cfg: SiteConfig, result, run_id: str) -> dict:
             for p in result.pages
         ],
         schema=pa.schema(
-            [("run_id", pa.string()), ("url", pa.string()), ("status", pa.int32()), ("attempts", pa.int32()),
-             ("elapsed_s", pa.float64()), ("error", pa.string()), ("block_reason", pa.string()),
-             ("n_items", pa.int32()), ("html_sha256", pa.string()), ("html", pa.large_string())]
+            [
+                ("run_id", pa.string()),
+                ("url", pa.string()),
+                ("status", pa.int32()),
+                ("attempts", pa.int32()),
+                ("elapsed_s", pa.float64()),
+                ("error", pa.string()),
+                ("block_reason", pa.string()),
+                ("n_items", pa.int32()),
+                ("html_sha256", pa.string()),
+                ("html", pa.large_string()),
+            ]
         ),  # fmt: skip
     )
     records = pa.Table.from_pylist(
@@ -72,7 +81,12 @@ def write_bronze(lake, cfg: SiteConfig, result, run_id: str) -> dict:
             for r in result.records
         ],
         schema=pa.schema(
-            [("run_id", pa.string()), ("scraped_at", pa.string()), ("page_url", pa.string()), ("record_json", pa.string())]
+            [
+                ("run_id", pa.string()),
+                ("scraped_at", pa.string()),
+                ("page_url", pa.string()),
+                ("record_json", pa.string()),
+            ]
         ),
     )
     put_parquet(lake, f"bronze/pages/{part}", pages)

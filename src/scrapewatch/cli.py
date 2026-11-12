@@ -15,7 +15,10 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="scrapewatch")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("validate", help="validate every configs/sites/*.yml")
-    for name, help_ in [("scrape", "scrape + monitor (bronze, run report)"), ("run", "scrape, monitor, silver, dbt, gate")]:
+    for name, help_ in [
+        ("scrape", "scrape + monitor (bronze, run report)"),
+        ("run", "scrape, monitor, silver, dbt, gate"),
+    ]:
         p = sub.add_parser(name, help=help_)
         p.add_argument("sites", nargs="*", help="site names (default: all configs)")
     p = sub.add_parser("silver", help="rebuild silver + quarantine from bronze")
