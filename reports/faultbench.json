@@ -1,0 +1,157 @@
+{
+  "summary": {
+    "faults_injected": 13,
+    "faults_detected": 13,
+    "faults_with_extra_classes": 0,
+    "clean_runs": 59,
+    "clean_runs_with_any_issue": 0,
+    "per_fault": {
+      "selector_rename": "detected (critical)",
+      "field_rename": "detected (critical)",
+      "optional_field_missing": "detected (warning)",
+      "price_format": "detected (critical)",
+      "layout_drift": "detected (warning)",
+      "rate_limited": "detected (critical)",
+      "forbidden": "detected (critical)",
+      "captcha": "detected (critical)",
+      "empty_body": "detected (critical)",
+      "drop_items": "detected (warning)",
+      "truncated_pagination": "detected (warning)",
+      "server_error": "detected (critical)",
+      "crash_markup": "detected (critical)"
+    }
+  },
+  "faults": [
+    {
+      "fault": "selector_rename",
+      "expected": "selector_breakage",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:selector_breakage"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "field_rename",
+      "expected": "selector_breakage",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:selector_breakage"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "optional_field_missing",
+      "expected": "selector_breakage",
+      "detected": true,
+      "severity": "warning",
+      "issues": [
+        "warning:selector_breakage"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "price_format",
+      "expected": "schema_drift",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:schema_drift"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "layout_drift",
+      "expected": "schema_drift",
+      "detected": true,
+      "severity": "warning",
+      "issues": [
+        "warning:schema_drift"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "rate_limited",
+      "expected": "blocked",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:blocked"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "forbidden",
+      "expected": "blocked",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:blocked"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "captcha",
+      "expected": "blocked",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:blocked"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "empty_body",
+      "expected": "blocked",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:blocked"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "drop_items",
+      "expected": "volume_anomaly",
+      "detected": true,
+      "severity": "warning",
+      "issues": [
+        "warning:volume_anomaly"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "truncated_pagination",
+      "expected": "volume_anomaly",
+      "detected": true,
+      "severity": "warning",
+      "issues": [
+        "warning:volume_anomaly"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "server_error",
+      "expected": "fetch_error",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:fetch_error"
+      ],
+      "other_classes": []
+    },
+    {
+      "fault": "crash_markup",
+      "expected": "crash",
+      "detected": true,
+      "severity": "critical",
+      "issues": [
+        "critical:crash"
+      ],
+      "other_classes": []
+    }
+  ],
+  "false_positives": []
+}
