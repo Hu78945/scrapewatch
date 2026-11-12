@@ -7,12 +7,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      azurite:  # the ADLS-backed lake tests run against the emulator instead of being skipped
-        image: mcr.microsoft.com/azure-storage/azurite:3.35.0
-        ports: ["10000:10000"]
     steps:
       - uses: actions/checkout@v4
+      # Azurite runs as a step, not a service, because services can't pass --skipApiVersionCheck
+      # (the pinned Azure SDK sends an API version newer than the emulator image knows).
+      - name: Start Azurite (the ADLS-backed lake tests run against it instead of being skipped)
+        run: docker run -d -p 10000:10000 mcr.microsoft.com/azure-storage/azurite:3.35.0 azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
       - uses: astral-sh/setup-uv@v6
       - name: Install (Python 3.12, dev + airflow groups)
         run: uv sync --all-groups --python 3.12
