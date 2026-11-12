@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      azurite:  # the ADLS-backed lake tests run against the emulator instead of being skipped
+        image: mcr.microsoft.com/azure-storage/azurite:3.35.0
+        ports: ["10000:10000"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install (Python 3.12, dev + airflow groups)
+        run: uv sync --all-groups --python 3.12
+      - name: Playwright Chromium (browser fetcher test on the local JS-rendered site)
+        run: uv run playwright install --with-deps --only-shell chromium
+      - name: Lint + tests (offline; no request leaves the runner except to the local test site and Azurite)
+        run: make test
+      - name: Fault-detection benchmark
+        run: make faultbench
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.1
+      - run: make tf

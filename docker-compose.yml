@@ -1,0 +1,24 @@
+# Local stack: Azurite (Azure Blob / ADLS Gen2 emulator) + the pipeline container.
+#   docker compose up -d azurite
+#   docker compose run --rm app run          # scrape -> monitor -> silver -> dbt -> gate, lake on Azurite
+# NOTE: written for, but not run on, the machine this project was built on (no Docker daemon there).
+# The same path was exercised with Azurite from npm instead (`make azurite`); see the README.
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.35.0
+    command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck --location /data
+    ports: ["10000:10000"]
+    volumes: ["azurite:/data"]
+
+  app:
+    build: .
+    environment:
+      SCRAPEWATCH_LAKE: az://lake
+      # Azurite's published, well-known development key. Never a real key: production uses Azure AD.
+      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      SCRAPEWATCH_ALERT_WEBHOOK: ${SCRAPEWATCH_ALERT_WEBHOOK:-}
+    volumes: ["./reports:/app/reports"]
+    depends_on: [azurite]
+
+volumes:
+  azurite:
