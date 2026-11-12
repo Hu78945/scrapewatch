@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_books
+    columns:
+      - name: book_id
+        tests: [unique, not_null]
+      - name: book_url
+        tests: [unique, not_null]
+      - name: price_gbp
+        tests: [not_null]
+      - name: rating_stars
+        tests:
+          - not_null
+          - accepted_values: {arguments: {values: [1, 2, 3, 4, 5]}}
+  - name: stg_quotes
+    columns:
+      - name: quote_text
+        tests: [not_null]
+      - name: author
+        tests: [not_null]
+      - name: fetcher
+        tests:
+          - accepted_values: {arguments: {values: [http, browser]}}
+  - name: stg_runs
+    columns:
+      - name: severity
+        tests:
+          - not_null
+          - accepted_values: {arguments: {values: [ok, warning, critical]}}

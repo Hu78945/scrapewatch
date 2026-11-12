@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: mart_books_by_rating
+    columns:
+      - name: rating_stars
+        tests: [unique, not_null]
+      - name: n_books
+        tests: [not_null]
+  - name: mart_tag_popularity
+    columns:
+      - name: tag
+        tests: [unique, not_null]
+  - name: mart_author_quotes
+    columns:
+      - name: author
+        tests: [unique, not_null]
+  - name: mart_scrape_health
+    tests:
+      - unique_combination:
+          arguments: {columns: [site, run_date]}
+    columns:
+      - name: last_severity
+        tests:
+          - accepted_values: {arguments: {values: [ok, warning, critical]}}

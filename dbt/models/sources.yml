@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: silver
+    description: Silver Parquet written by scrapewatch.silver (typed, validated, deduplicated by record key).
+    meta:
+      external_location: "read_parquet('{{ var('silver_root') }}/{name}/{name}.parquet')"
+    tables:
+      - name: books_toscrape
+        columns:
+          - name: record_key
+            tests: [unique, not_null]
+      - name: quotes_toscrape
+        columns:
+          - name: record_key
+            tests: [unique, not_null]
+      - name: quotes_toscrape_js
+        columns:
+          - name: record_key
+            tests: [unique, not_null]
+  - name: ops
+    meta:
+      external_location: "read_parquet('{{ var('silver_root') }}/_ops/{name}.parquet')"
+    tables:
+      - name: run_history
+        description: One row per monitored scrape run (all sites), from the lake's ops/runs log.
+        columns:
+          - name: run_id
+            tests: [unique, not_null]

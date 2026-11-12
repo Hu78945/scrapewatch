@@ -1,0 +1,7 @@
+scrapewatch:
+  target: duckdb
+  outputs:
+    duckdb:
+      type: duckdb
+      path: "{{ env_var('SCRAPEWATCH_DUCKDB', '../warehouse/gold.duckdb') }}"
+      threads: 4
